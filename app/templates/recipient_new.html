@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Thêm bên nhận{% endblock %}
+{% block content %}
+<p><a href="/dashboard/recipients">← Danh sách bên nhận</a></p>
+<h1>Thêm bên nhận</h1>
+<div class="card">
+<form method="post" action="/dashboard/recipients" class="form" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label>Tên bên nhận <span class="req">*</span><input name="name" value="{{ form.name or '' }}" maxlength="100" required placeholder="vd: billing-service / Nguyễn Văn A"></label>
+  <label>Mô tả<input name="description" value="{{ form.description or '' }}"></label>
+  <label>Public key X25519 <span class="req">*</span>
+    <textarea name="public_key" rows="3" class="mono" spellcheck="false" required placeholder="Base64 (32 byte) hoặc PEM">{{ form.public_key or '' }}</textarea>
+  </label>
+  <p class="muted small">Bên nhận tạo cặp khóa bằng lệnh <code>python kvclient.py keygen --out recipient.key</code> và gửi bạn <strong>public key</strong>. Private key không bao giờ rời khỏi máy bên nhận.</p>
+  <button class="btn btn-primary">Tạo và cấp API key + OTP</button>
+</form>
+</div>
+{% endblock %}

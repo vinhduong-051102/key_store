@@ -1,0 +1,5 @@
+.env
+data/
+tests/
+client/
+__pycache__/

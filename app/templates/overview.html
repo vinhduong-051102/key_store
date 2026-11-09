@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% from "_macros.html" import export_table %}
+{% block title %}Tổng quan{% endblock %}
+{% block content %}
+<h1>Tổng quan</h1>
+<div class="stats">
+  <div class="stat"><div class="stat-label">Key đang hoạt động</div><div class="stat-value">{{ stats.active_keys }}</div></div>
+  <div class="stat"><div class="stat-label">Bên nhận hoạt động</div><div class="stat-value">{{ stats.recipients }}</div></div>
+  <div class="stat"><div class="stat-label">Lượt lấy key (24h)</div><div class="stat-value">{{ stats.exports_24h }}</div></div>
+  <div class="stat"><div class="stat-label">Đang chờ OTP</div><div class="stat-value">{{ stats.pending }}</div></div>
+  <div class="stat {{ 'stat-warn' if stats.failed_24h }}"><div class="stat-label">Sự kiện thất bại (24h)</div><div class="stat-value">{{ stats.failed_24h }}</div></div>
+</div>
+
+<section>
+  <div class="section-head"><h2>Lượt lấy key gần đây</h2><a href="/dashboard/exports">Xem tất cả →</a></div>
+  {{ export_table(recent) }}
+</section>
+
+<section>
+  <div class="section-head"><h2>Cảnh báo bảo mật gần đây</h2><a href="/dashboard/audit?only_failed=true">Xem tất cả →</a></div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Thời gian</th><th>Đối tượng</th><th>Hành động</th><th>Mục tiêu</th><th>IP</th><th>Chi tiết</th></tr></thead>
+    <tbody>
+    {% for a in alerts %}
+      <tr><td class="nowrap">{{ a.ts|dt }}</td><td>{{ a.actor }}</td><td class="mono">{{ a.action }}</td>
+          <td>{{ a.target or '—' }}</td><td class="mono">{{ a.ip or '—' }}</td><td>{{ a.details }}</td></tr>
+    {% else %}
+      <tr><td colspan="6" class="empty">Không có sự kiện thất bại nào.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}

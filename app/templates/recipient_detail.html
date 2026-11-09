@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, export_table %}
+{% block title %}{{ r.name }}{% endblock %}
+{% block content %}
+<p><a href="/dashboard/recipients">← Danh sách bên nhận</a></p>
+<div class="section-head">
+  <h1>{{ r.name }} {{ badge(r.status) }} {% if locked %}<span class="badge badge-failed">Tạm khóa</span>{% endif %}</h1>
+  <div class="actions">
+    {% if locked %}
+    <form method="post" action="/dashboard/recipients/{{ r.id }}/unlock"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn">Gỡ khóa tạm</button></form>
+    {% endif %}
+    <form method="post" action="/dashboard/recipients/{{ r.id }}/reenroll" data-confirm="Cấp lại sẽ VÔ HIỆU API key và mã OTP hiện tại. Tiếp tục?"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn">Cấp lại API key + OTP</button></form>
+    {% if r.status != 'pending' %}
+    <form method="post" action="/dashboard/recipients/{{ r.id }}/toggle" data-confirm="{{ 'Vô hiệu hóa bên nhận này?' if r.status == 'active' else 'Kích hoạt lại bên nhận này?' }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn {{ 'btn-danger' if r.status == 'active' else 'btn-primary' }}">{{ 'Vô hiệu hóa' if r.status == 'active' else 'Kích hoạt lại' }}</button></form>
+    {% endif %}
+  </div>
+</div>
+
+{% if r.status == 'pending' %}
+<div class="card">
+  <h2>Chờ kích hoạt</h2>
+  <p>Nhập mã OTP hiện tại trên Google Authenticator của bên nhận để kích hoạt.</p>
+  <form method="post" action="/dashboard/recipients/{{ r.id }}/confirm" class="form form-inline">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input name="otp" inputmode="numeric" maxlength="7" required placeholder="123456" autocomplete="off">
+    <button class="btn btn-primary">Kích hoạt</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="grid-2">
+  <div class="card">
+    <h2>Thông tin</h2>
+    <dl class="kv">
+      <dt>ID</dt><dd class="mono">{{ r.id }}</dd>
+      <dt>Mô tả</dt><dd>{{ r.description or '—' }}</dd>
+      <dt>API key</dt><dd class="mono">{{ r.api_key_prefix }}…</dd>
+      <dt>Public key</dt><dd class="mono break">{{ r.public_key }}</dd>
+      <dt>Tạo lúc</dt><dd>{{ r.created_at|dt }} bởi {{ r.created_by }}</dd>
+      <dt>Kích hoạt lúc</dt><dd>{{ r.activated_at|dt }}</dd>
+      {% if locked %}<dt>Khóa đến</dt><dd>{{ r.locked_until|dt }}</dd>{% endif %}
+    </dl>
+  </div>
+  <div class="card">
+    <h2>Key được cấp quyền</h2>
+    {% for k in r.keys %}<a class="chip" href="/dashboard/keys/{{ k.id }}">{{ k.name }}</a>{% else %}<p class="muted">Chưa được cấp key nào. Cấp quyền tại trang chi tiết của từng key.</p>{% endfor %}
+  </div>
+</div>
+
+<section>
+  <h2>Lịch sử lấy key</h2>
+  {{ export_table(exports, show_recipient=False) }}
+</section>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% from "_macros.html" import export_table %}
+{% block title %}Lịch sử lấy key{% endblock %}
+{% block content %}
+<h1>Lịch sử lấy key</h1>
+<form method="get" class="filters">
+  <select name="recipient_id"><option value="">Tất cả bên nhận</option>
+    {% for r in recipients %}<option value="{{ r.id }}" {{ 'selected' if f.recipient_id == r.id }}>{{ r.name }}</option>{% endfor %}
+  </select>
+  <select name="key_id"><option value="">Tất cả key</option>
+    {% for k in keys %}<option value="{{ k.id }}" {{ 'selected' if f.key_id == k.id }}>{{ k.name }}</option>{% endfor %}
+  </select>
+  <select name="status"><option value="">Mọi trạng thái</option>
+    {% for s in ['consumed','pending','expired','failed'] %}<option value="{{ s }}" {{ 'selected' if f.status == s }}>{{ status_label(s) }}</option>{% endfor %}
+  </select>
+  <button class="btn">Lọc</button>
+  <a href="/dashboard/exports" class="btn btn-ghost">Xóa lọc</a>
+</form>
+<p class="muted small"><strong>Đã lấy</strong> = bên nhận đã nhập đúng OTP và nhận được khóa giải mã. <strong>Hết hạn / Thất bại</strong> = chỉ nhận ciphertext, không thể giải mã.</p>
+{{ export_table(exports) }}
+{% endblock %}

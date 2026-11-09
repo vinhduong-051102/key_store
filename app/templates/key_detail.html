@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, export_table %}
+{% block title %}{{ key.name }}{% endblock %}
+{% block content %}
+<p><a href="/dashboard/keys">← Danh sách key</a></p>
+<div class="section-head">
+  <h1>{{ key.name }} {{ badge(key.status) }}</h1>
+  <form method="post" action="/dashboard/keys/{{ key.id }}/toggle" data-confirm="{{ 'Vô hiệu hóa key này? Bên nhận sẽ không thể lấy key nữa.' if key.status == 'active' else 'Kích hoạt lại key này?' }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <button class="btn {{ 'btn-danger' if key.status == 'active' else 'btn-primary' }}">{{ 'Vô hiệu hóa' if key.status == 'active' else 'Kích hoạt lại' }}</button>
+  </form>
+</div>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>Thông tin</h2>
+    <dl class="kv">
+      <dt>Key ID</dt><dd class="mono">{{ key.id }}</dd>
+      <dt>Mô tả</dt><dd>{{ key.description or '—' }}</dd>
+      <dt>Fingerprint</dt><dd class="mono">{{ key.fingerprint }}</dd>
+      <dt>Kích thước</dt><dd>{{ key.size_bytes }} byte ({{ key.value_format }})</dd>
+      <dt>Tạo lúc</dt><dd>{{ key.created_at|dt }} bởi {{ key.created_by }}</dd>
+    </dl>
+  </div>
+  <div class="card">
+    <h2>Quyền truy cập</h2>
+    {% if recipients %}
+    <form method="post" action="/dashboard/keys/{{ key.id }}/grants" class="form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div class="checklist">
+      {% for r in recipients %}
+        <label class="check"><input type="checkbox" name="recipient_ids" value="{{ r.id }}" {{ 'checked' if r.id in granted }}> {{ r.name }} {{ badge(r.status) }}</label>
+      {% endfor %}
+      </div>
+      <button class="btn btn-primary">Lưu quyền</button>
+    </form>
+    {% else %}
+      <p class="muted">Chưa có bên nhận nào. <a href="/dashboard/recipients/new">Thêm bên nhận</a>.</p>
+    {% endif %}
+  </div>
+</div>
+
+<section>
+  <h2>Lịch sử lấy key này</h2>
+  {{ export_table(exports, show_key=False) }}
+</section>
+{% endblock %}

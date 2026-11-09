@@ -1,0 +1,32 @@
+{% macro badge(status) -%}
+<span class="badge badge-{{ status }}">{{ status_label(status) }}</span>
+{%- endmacro %}
+
+{% macro export_table(exports, show_key=True, show_recipient=True) -%}
+<div class="table-wrap">
+<table>
+  <thead><tr>
+    <th>Thời gian yêu cầu</th>
+    {% if show_recipient %}<th>Bên nhận</th>{% endif %}
+    {% if show_key %}<th>Key</th>{% endif %}
+    <th>Trạng thái</th><th>Lần nhập OTP</th><th>IP yêu cầu</th><th>Mở khóa lúc</th><th>IP mở khóa</th>
+  </tr></thead>
+  <tbody>
+  {% for e in exports %}
+    <tr>
+      <td class="nowrap">{{ e.created_at|dt }}</td>
+      {% if show_recipient %}<td><a href="/dashboard/recipients/{{ e.recipient_id }}">{{ e.recipient.name }}</a></td>{% endif %}
+      {% if show_key %}<td><a href="/dashboard/keys/{{ e.key_id }}">{{ e.key.name }}</a></td>{% endif %}
+      <td>{{ badge(e.status) }}</td>
+      <td>{{ e.attempts }}</td>
+      <td class="mono">{{ e.request_ip or '—' }}</td>
+      <td class="nowrap">{{ e.unlocked_at|dt }}</td>
+      <td class="mono">{{ e.unlock_ip or '—' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="empty">Chưa có lượt lấy key nào.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{%- endmacro %}

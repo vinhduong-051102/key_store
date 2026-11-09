@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Audit log{% endblock %}
+{% block content %}
+<div class="section-head">
+  <h1>Audit log</h1>
+  <a class="btn btn-ghost" href="/dashboard/audit{{ '' if only_failed else '?only_failed=true' }}">{{ 'Hiện tất cả' if only_failed else 'Chỉ hiện thất bại' }}</a>
+</div>
+<div class="table-wrap"><table>
+  <thead><tr><th>Thời gian</th><th>Loại</th><th>Đối tượng</th><th>Hành động</th><th>Mục tiêu</th><th>Kết quả</th><th>IP</th><th>Chi tiết</th></tr></thead>
+  <tbody>
+  {% for a in rows %}
+    <tr class="{{ '' if a.success else 'row-fail' }}">
+      <td class="nowrap">{{ a.ts|dt }}</td><td>{{ a.actor_type }}</td><td>{{ a.actor }}</td>
+      <td class="mono">{{ a.action }}</td><td>{{ a.target or '—' }}</td>
+      <td>{% if a.success %}<span class="badge badge-consumed">OK</span>{% else %}<span class="badge badge-failed">Lỗi</span>{% endif %}</td>
+      <td class="mono">{{ a.ip or '—' }}</td><td>{{ a.details }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="empty">Chưa có sự kiện.</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+<div class="pager">
+  {% set q = '&only_failed=true' if only_failed else '' %}
+  {% if page > 1 %}<a class="btn btn-ghost" href="?page={{ page - 1 }}{{ q }}">← Trước</a>{% endif %}
+  <span class="muted">Trang {{ page }}</span>
+  {% if has_next %}<a class="btn btn-ghost" href="?page={{ page + 1 }}{{ q }}">Sau →</a>{% endif %}
+</div>
+{% endblock %}

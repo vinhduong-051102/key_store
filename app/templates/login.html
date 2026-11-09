@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Đăng nhập{% endblock %}
+{% block content %}
+<div class="login-card card">
+  <h1>🔐 KeyVault</h1>
+  <p class="muted">Đăng nhập quản trị bằng mật khẩu và mã Google Authenticator.</p>
+  <form method="post" action="/dashboard/login" class="form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <label>Tên đăng nhập<input name="username" value="{{ username or '' }}" required autofocus autocomplete="username"></label>
+    <label>Mật khẩu<input type="password" name="password" required autocomplete="current-password"></label>
+    <label>Mã OTP (6 số)<input name="otp" inputmode="numeric" pattern="[0-9 ]{6,7}" maxlength="7" required autocomplete="one-time-code"></label>
+    <button class="btn btn-primary">Đăng nhập</button>
+  </form>
+</div>
+{% endblock %}

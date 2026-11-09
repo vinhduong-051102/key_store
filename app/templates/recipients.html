@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Bên nhận{% endblock %}
+{% block content %}
+<div class="section-head"><h1>Bên nhận</h1><a class="btn btn-primary" href="/dashboard/recipients/new">+ Thêm bên nhận</a></div>
+<div class="table-wrap"><table>
+  <thead><tr><th>Tên</th><th>Trạng thái</th><th>API key</th><th>Key được cấp</th><th>Số lượt lấy</th><th>Lấy gần nhất</th><th>Tạo lúc</th></tr></thead>
+  <tbody>
+  {% for r in recipients %}
+    {% set st = stats.get(r.id, (0, None)) %}
+    <tr>
+      <td><a href="/dashboard/recipients/{{ r.id }}"><strong>{{ r.name }}</strong></a>{% if r.description %}<div class="muted small">{{ r.description }}</div>{% endif %}</td>
+      <td>{{ badge(r.status) }}{% if r.locked_until and r.locked_until > now %} <span class="badge badge-failed">Tạm khóa</span>{% endif %}</td>
+      <td class="mono">{{ r.api_key_prefix }}…</td>
+      <td>{% for k in r.keys %}<span class="chip">{{ k.name }}</span>{% else %}<span class="muted">—</span>{% endfor %}</td>
+      <td>{{ st[0] }}</td>
+      <td class="nowrap">{{ st[1]|dt }}</td>
+      <td class="nowrap">{{ r.created_at|dt }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="7" class="empty">Chưa có bên nhận nào.</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Yêu cầu truy cập{% endblock %}
+{% block content %}
+<h1>Yêu cầu truy cập</h1>
+<div class="tabs">
+  {% for s, l in [('pending','Chờ duyệt'), ('approved','Đã duyệt (chưa nhận)'), ('claimed','Đã nhận'), ('rejected','Từ chối'), ('','Tất cả')] %}
+    <a href="/dashboard/requests?status={{ s }}" class="{{ 'active' if status == s }}">{{ l }}</a>
+  {% endfor %}
+</div>
+<p class="muted small">Người ngoài gửi yêu cầu qua <code>POST /api/v1/access-requests</code>. Bạn duyệt hoặc từ chối tại đây. Khi được duyệt, người xin quyền dùng claim token để nhận API key, OTP và cặp khóa (một lần duy nhất).</p>
+<div class="table-wrap"><table>
+  <thead><tr><th>Gửi lúc</th><th>Tên</th><th>Liên hệ</th><th>Tổ chức</th><th>Key muốn truy cập</th><th>Cặp khóa</th><th>Trạng thái</th><th>IP</th></tr></thead>
+  <tbody>
+  {% for q in rows %}
+    <tr>
+      <td class="nowrap">{{ q.created_at|dt }}</td>
+      <td><a href="/dashboard/requests/{{ q.id }}"><strong>{{ q.name }}</strong></a></td>
+      <td>{{ q.contact }}</td>
+      <td>{{ q.organization or '—' }}</td>
+      <td>{{ q.requested_keys or '—' }}</td>
+      <td>{{ 'Tự cung cấp' if q.public_key else 'Server sinh' }}</td>
+      <td>{{ badge(q.status) }}</td>
+      <td class="mono">{{ q.request_ip or '—' }}</td>
+    </tr>
+  {% else %}
+    <tr><td colspan="8" class="empty">Không có yêu cầu nào.</td></tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{% endblock %}

@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}KeyVault{% endblock %} · KeyVault</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+{% if admin %}
+<header class="topbar">
+  <a class="brand" href="/dashboard">🔐 KeyVault</a>
+  <nav>
+    <a href="/dashboard" class="{{ 'active' if nav == 'overview' }}">Tổng quan</a>
+    <a href="/dashboard/requests" class="{{ 'active' if nav.startswith('request') }}">Yêu cầu truy cập{% if pending_requests %} <span class="count">{{ pending_requests }}</span>{% endif %}</a>
+    <a href="/dashboard/keys" class="{{ 'active' if nav.startswith('key') }}">Keys</a>
+    <a href="/dashboard/recipients" class="{{ 'active' if nav.startswith('recipient') }}">Bên nhận</a>
+    <a href="/dashboard/exports" class="{{ 'active' if nav == 'exports' }}">Lịch sử lấy key</a>
+    <a href="/dashboard/audit" class="{{ 'active' if nav == 'audit' }}">Audit log</a>
+  </nav>
+  <form method="post" action="/dashboard/logout" class="logout">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <span class="muted">{{ admin.username }}</span>
+    <button class="btn btn-ghost">Đăng xuất</button>
+  </form>
+</header>
+{% endif %}
+<main class="container">
+  {% for cat, msg in flashes %}<div class="flash flash-{{ cat }}">{{ msg }}</div>{% endfor %}
+  {% if error %}<div class="flash flash-error">{{ error }}</div>{% endif %}
+  {% block content %}{% endblock %}
+</main>
+</body>
+</html>

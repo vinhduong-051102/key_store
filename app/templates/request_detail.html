@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Yêu cầu từ {{ req.name }}{% endblock %}
+{% block content %}
+<p><a href="/dashboard/requests">← Danh sách yêu cầu</a></p>
+<h1>Yêu cầu từ {{ req.name }} {{ badge(req.status) }}</h1>
+
+<div class="grid-2">
+  <div class="card">
+    <h2>Thông tin yêu cầu</h2>
+    <dl class="kv">
+      <dt>Tên</dt><dd>{{ req.name }}</dd>
+      <dt>Liên hệ</dt><dd>{{ req.contact }}</dd>
+      <dt>Tổ chức</dt><dd>{{ req.organization or '—' }}</dd>
+      <dt>Lý do</dt><dd class="pre">{{ req.reason }}</dd>
+      <dt>Key muốn truy cập</dt><dd class="pre">{{ req.requested_keys or '—' }}</dd>
+      <dt>Cặp khóa</dt><dd>{% if req.public_key %}Tự cung cấp public key<div class="mono break small">{{ req.public_key }}</div>{% else %}Server sẽ sinh khi người xin quyền nhận thông tin{% endif %}</dd>
+      <dt>Gửi lúc</dt><dd>{{ req.created_at|dt }}</dd>
+      <dt>IP / User-Agent</dt><dd><span class="mono">{{ req.request_ip or '—' }}</span><div class="muted small break">{{ req.user_agent }}</div></dd>
+    </dl>
+  </div>
+
+  {% if req.status == 'pending' %}
+  <div class="card">
+    <h2>Duyệt yêu cầu</h2>
+    <form method="post" action="/dashboard/requests/{{ req.id }}/approve" class="form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Tên bên nhận sẽ tạo<input name="recipient_name" value="{{ form.recipient_name or '' }}" maxlength="100" required></label>
+      <div><strong>Cấp quyền truy cập key</strong>
+        <div class="checklist">
+        {% for k in keys %}
+          <label class="check"><input type="checkbox" name="key_ids" value="{{ k.id }}" {{ 'checked' if form.key_ids and k.id in form.key_ids }}> {{ k.name }} <span class="muted small">{{ k.description }}</span></label>
+        {% else %}
+          <p class="muted">Chưa có key nào. Bạn vẫn có thể duyệt rồi cấp quyền sau.</p>
+        {% endfor %}
+        </div>
+      </div>
+      <label>Ghi chú (người xin quyền sẽ thấy)<input name="note" value="{{ form.note or '' }}" maxlength="1000"></label>
+      <button class="btn btn-primary">Chấp nhận</button>
+    </form>
+    <hr>
+    <form method="post" action="/dashboard/requests/{{ req.id }}/reject" class="form" data-confirm="Từ chối yêu cầu này?">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Lý do từ chối (người xin quyền sẽ thấy)<input name="note" maxlength="1000"></label>
+      <button class="btn btn-danger">Từ chối</button>
+    </form>
+  </div>
+  {% else %}
+  <div class="card">
+    <h2>Kết quả xử lý</h2>
+    <dl class="kv">
+      <dt>Trạng thái</dt><dd>{{ badge(req.status) }}</dd>
+      <dt>Xử lý bởi</dt><dd>{{ req.reviewed_by or '—' }} lúc {{ req.reviewed_at|dt }}</dd>
+      <dt>Ghi chú</dt><dd>{{ req.review_note or '—' }}</dd>
+      {% if req.recipient %}<dt>Bên nhận</dt><dd><a href="/dashboard/recipients/{{ req.recipient.id }}">{{ req.recipient.name }}</a> {{ badge(req.recipient.status) }}</dd>{% endif %}
+      {% if req.status == 'approved' %}<dt>Hạn nhận thông tin</dt><dd>{{ req.claim_expires_at|dt }}</dd>{% endif %}
+      {% if req.status == 'claimed' %}<dt>Đã nhận lúc</dt><dd>{{ req.claimed_at|dt }} từ <span class="mono">{{ req.claim_ip }}</span></dd>{% endif %}
+    </dl>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

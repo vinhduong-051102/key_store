@@ -1,0 +1,19 @@
+services:
+  keyvault:
+    build: .
+    image: keyvault:latest
+    env_file: .env
+    environment:
+      # IP của reverse proxy được phép gửi X-Forwarded-For (sửa theo hạ tầng của bạn)
+      FORWARDED_ALLOW_IPS: "127.0.0.1"
+    volumes:
+      - kv-data:/data
+    ports:
+      - "127.0.0.1:8000:8000"   # chỉ mở localhost; public qua reverse proxy có TLS
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: ["no-new-privileges:true"]
+
+volumes:
+  kv-data:

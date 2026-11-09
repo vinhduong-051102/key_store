@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Thêm key{% endblock %}
+{% block content %}
+<p><a href="/dashboard/keys">← Danh sách key</a></p>
+<h1>Thêm key mới</h1>
+<div class="card">
+<form method="post" action="/dashboard/keys" class="form" autocomplete="off">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+  <label>Tên key <span class="req">*</span><input name="name" value="{{ form.name or '' }}" maxlength="100" required placeholder="vd: payment-gateway-hmac"></label>
+  <label>Mô tả<input name="description" value="{{ form.description or '' }}" placeholder="Dùng cho hệ thống nào, ai phụ trách..."></label>
+  <label>Định dạng giá trị
+    <select name="value_format">
+      {% for v, l in [('text','Văn bản (UTF-8, vd: PEM, token)'), ('hex','Hex'), ('base64','Base64'), ('random','Sinh ngẫu nhiên an toàn')] %}
+        <option value="{{ v }}" {{ 'selected' if form.value_format == v }}>{{ l }}</option>
+      {% endfor %}
+    </select>
+  </label>
+  <label>Giá trị key <span class="muted small">(bỏ trống nếu chọn “Sinh ngẫu nhiên”)</span>
+    <textarea name="value" rows="6" class="mono" spellcheck="false" placeholder="Dán giá trị key vào đây"></textarea>
+  </label>
+  <label>Độ dài khi sinh ngẫu nhiên (byte)<input name="random_bytes" type="number" min="16" max="1024" value="{{ form.random_bytes or '32' }}"></label>
+  <p class="muted small">Giá trị được mã hóa ngay khi lưu (AES-256-GCM + envelope encryption) và <strong>không bao giờ hiển thị lại</strong> trên dashboard. Chỉ bên nhận được cấp quyền, có private key và mã OTP mới giải mã được.</p>
+  <button class="btn btn-primary">Lưu key</button>
+</form>
+</div>
+{% endblock %}

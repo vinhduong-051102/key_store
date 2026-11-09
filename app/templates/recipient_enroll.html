@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Đăng ký {{ recipient.name }}{% endblock %}
+{% block content %}
+<h1>Đăng ký bên nhận: {{ recipient.name }}</h1>
+<div class="flash flash-warn">⚠️ API key và mã QR <strong>chỉ hiển thị một lần</strong>. Hãy chuyển cho bên nhận qua kênh an toàn trước khi rời trang.</div>
+<div class="grid-2">
+  <div class="card">
+    <h2>1. API key</h2>
+    <div class="secret-box"><code id="api-key">{{ api_key }}</code><button type="button" class="btn btn-ghost" data-copy="api-key">Sao chép</button></div>
+    <p class="muted small">Bên nhận dùng header <code>X-API-Key</code> hoặc biến môi trường <code>KV_API_KEY</code> cho client.</p>
+    <h2>3. Kích hoạt</h2>
+    <p>Sau khi quét QR, nhập mã 6 số đang hiện trên Google Authenticator của bên nhận:</p>
+    <form method="post" action="/dashboard/recipients/{{ recipient.id }}/confirm" class="form form-inline">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input name="otp" inputmode="numeric" maxlength="7" required placeholder="123456" autocomplete="off">
+      <button class="btn btn-primary">Kích hoạt</button>
+    </form>
+  </div>
+  <div class="card center">
+    <h2>2. Quét bằng Google Authenticator</h2>
+    <div class="qr">{{ qr_svg|safe }}</div>
+    <p class="muted small">Hoặc nhập thủ công secret:</p>
+    <div class="secret-box"><code id="totp-secret">{{ totp_secret }}</code><button type="button" class="btn btn-ghost" data-copy="totp-secret">Sao chép</button></div>
+  </div>
+</div>
+{% endblock %}
